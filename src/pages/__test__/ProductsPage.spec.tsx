@@ -3,7 +3,7 @@ import { test } from "vitest";
 import App from "../../App";
 
 test("loads and display the title", async () => {
-    render(<App />)
+    render(<App />);
 
-    await screen.findByRole("heading", { name: "Product price updater" })
-})
+    await screen.findByRole("heading", { name: "Product price updater" });
+});
