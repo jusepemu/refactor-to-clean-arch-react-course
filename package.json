@@ -11,7 +11,7 @@
         "preview": "vite preview",
         "test": "vitest run",
         "test-watch": "vite watch",
-        "prepare": "husky install"
+        "prepare": "husky"
     },
     "dependencies": {
         "@emotion/react": "^11.11.1",
@@ -38,6 +38,7 @@
         "eslint-plugin-react-refresh": "^0.4.4",
         "husky": "^9.1.7",
         "jsdom": "^25.0.1",
+        "msw": "^2.7.0",
         "prettier": "^2.8.7",
         "typescript": "5.2.2",
         "vite": "^5.0.0",
