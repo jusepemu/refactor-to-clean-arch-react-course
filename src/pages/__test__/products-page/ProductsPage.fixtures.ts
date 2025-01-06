@@ -10,6 +10,8 @@ export function givenAProducts(mockWebServer: MockWebServer) {
             response: productsResponse,
         },
     ]);
+
+    return productsResponse;
 }
 
 export function givenThereAreNoProducts(mockWebServer: MockWebServer) {
