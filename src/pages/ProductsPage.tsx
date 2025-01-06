@@ -194,6 +194,7 @@ export const ProductsPage: React.FC = () => {
                 <DataGrid<Product>
                     rowHeight={300}
                     rows={products}
+                    columnBuffer={10}
                     columns={columns}
                     initialState={{
                         pagination: {
