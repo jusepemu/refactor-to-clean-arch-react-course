@@ -1,6 +1,7 @@
-import { within } from "@testing-library/dom";
+import { screen, within } from "@testing-library/dom";
 import { expect } from "vitest";
 import { RemoteProduct } from "../../../api/StoreApi";
+import userEvent from "@testing-library/user-event";
 
 export function verifyProductTableHeaders(rowHeader: HTMLElement) {
     const headerRowScope = within(rowHeader);
@@ -29,5 +30,28 @@ export function verifyProductsRowsIsEqualToResponse(
         rowScope.getByRole("cell", { name: new RegExp(product.title, "i") });
         rowScope.getByRole("cell", { name: new RegExp(String(product.price), "i") });
         rowScope.getByRole("cell", { name: new RegExp(status, "i") });
+    });
+}
+
+export async function getEditPriceDialogByRowIndex(rowIndex: number) {
+    const user = userEvent.setup();
+
+    const rows = await screen.findAllByRole("row");
+
+    const [, ...productsRows] = rows;
+
+    const productRow = within(productsRows[rowIndex]);
+    const actions = productRow.getByRole("menuitem", { name: /more/i });
+
+    await user.click(actions);
+
+    const updatePriceButton = await screen.findByRole("menuitem", {
+        name: /update price/i,
+    });
+
+    await user.click(updatePriceButton);
+
+    return await screen.findByRole("dialog", {
+        name: /update price/i,
     });
 }
