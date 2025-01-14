@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/dom";
+import { screen, waitFor, within } from "@testing-library/dom";
 import { expect } from "vitest";
 import { RemoteProduct } from "../../../api/StoreApi";
 import userEvent from "@testing-library/user-event";
@@ -13,6 +13,13 @@ export function verifyProductTableHeaders(rowHeader: HTMLElement) {
     for (const column of columns) {
         headerRowScope.getByRole("columnheader", { name: new RegExp(column, "i") });
     }
+}
+
+export async function awaitToRenderTable() {
+    await waitFor(async () => {
+        const rows = await screen.findAllByRole("row");
+        expect(rows.length).toBeGreaterThan(1);
+    });
 }
 
 export function verifyProductsRowsIsEqualToResponse(
@@ -54,4 +61,23 @@ export async function getEditPriceDialogByRowIndex(rowIndex: number) {
     return await screen.findByRole("dialog", {
         name: /update price/i,
     });
+}
+
+export async function typePrice(dialog: HTMLElement, price: string) {
+    expect(dialog).toBeTruthy();
+    const user = userEvent.setup();
+
+    const dialogScope = within(dialog);
+
+    const priceTextBox = dialogScope.getByRole("textbox", { name: /price/i });
+
+    await user.clear(priceTextBox);
+    await user.type(priceTextBox, price);
+}
+
+export async function verifyError(dialog: HTMLElement, error: string) {
+    expect(dialog).toBeTruthy();
+    const dialogScope = within(dialog);
+
+    await dialogScope.findByText(new RegExp(error, "i"));
 }

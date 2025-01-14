@@ -1,11 +1,14 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "vitest";
 import { AppProvider } from "../../../context/AppProvider";
 import { ProductsPage } from "../../ProductsPage";
 import { MockWebServer } from "../../../tests/MockWebServer";
 import { givenAProducts, givenThereAreNoProducts } from "./ProductsPage.fixtures";
 import {
+    awaitToRenderTable,
     getEditPriceDialogByRowIndex,
+    typePrice,
+    verifyError,
     verifyProductsRowsIsEqualToResponse,
     verifyProductTableHeaders,
 } from "./ProductsPage.helpers";
@@ -57,10 +60,7 @@ describe("Products page", () => {
 
             render(renderComponent());
 
-            await waitFor(async () => {
-                const rows = await screen.findAllByRole("row");
-                expect(rows.length).toBeGreaterThan(1);
-            });
+            await awaitToRenderTable();
 
             const rows = await screen.findAllByRole("row");
 
@@ -78,18 +78,58 @@ describe("Products page", () => {
 
             render(renderComponent());
 
-            await waitFor(async () => {
-                const rows = await screen.findAllByRole("row");
-                expect(rows.length).toBeGreaterThan(1);
-            });
+            await awaitToRenderTable();
 
             const dialog = await getEditPriceDialogByRowIndex(0);
 
             const product = products[0];
+
             const dialogScope = within(dialog);
 
             dialogScope.getByText(product.title);
             screen.getByDisplayValue(product.price);
+        });
+
+        test("should show a error when price is lower than zero", async () => {
+            givenAProducts(mockWebServer);
+
+            render(renderComponent());
+
+            await awaitToRenderTable();
+
+            const dialog = await getEditPriceDialogByRowIndex(0);
+
+            await typePrice(dialog, "-3");
+
+            await verifyError(dialog, "Invalid price format");
+        });
+
+        test("should show a error when price is string", async () => {
+            givenAProducts(mockWebServer);
+
+            render(renderComponent());
+
+            await awaitToRenderTable();
+
+            const dialog = await getEditPriceDialogByRowIndex(0);
+
+            await typePrice(dialog, "aaaa");
+
+            await verifyError(dialog, "Only numbers are allowed");
+        });
+
+        test("should show a error when price is upper to 999.99", async () => {
+            givenAProducts(mockWebServer);
+
+            render(renderComponent());
+
+            await awaitToRenderTable();
+
+            const dialog = await getEditPriceDialogByRowIndex(0);
+
+            await typePrice(dialog, "1000");
+
+            await verifyError(dialog, "The max possible price is 999.99");
         });
     });
 });
