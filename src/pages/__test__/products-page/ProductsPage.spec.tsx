@@ -7,8 +7,10 @@ import { givenAProducts, givenThereAreNoProducts } from "./ProductsPage.fixtures
 import {
     awaitToRenderTable,
     getEditPriceDialogByRowIndex,
+    savePrice,
     typePrice,
     verifyError,
+    verifyPriceAndStatus,
     verifyProductsRowsIsEqualToResponse,
     verifyProductTableHeaders,
 } from "./ProductsPage.helpers";
@@ -130,6 +132,32 @@ describe("Products page", () => {
             await typePrice(dialog, "1000");
 
             await verifyError(dialog, "The max possible price is 999.99");
+        });
+
+        test("should update the price correctly ans mark with status active if price is grant to 0", async () => {
+            givenAProducts(mockWebServer);
+            render(renderComponent());
+            await awaitToRenderTable();
+
+            const price = "120.99";
+            const dialog = await getEditPriceDialogByRowIndex(0);
+            await typePrice(dialog, price);
+            await savePrice(dialog);
+
+            await verifyPriceAndStatus(0, price);
+        });
+
+        test("should update the price correctly ans mark with status inactive if price is equal to 0", async () => {
+            givenAProducts(mockWebServer);
+            render(renderComponent());
+            await awaitToRenderTable();
+
+            const price = "0";
+            const dialog = await getEditPriceDialogByRowIndex(0);
+            await typePrice(dialog, price);
+            await savePrice(dialog);
+
+            await verifyPriceAndStatus(0, price);
         });
     });
 });

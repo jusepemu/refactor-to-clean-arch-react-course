@@ -81,3 +81,26 @@ export async function verifyError(dialog: HTMLElement, error: string) {
 
     await dialogScope.findByText(new RegExp(error, "i"));
 }
+
+export async function savePrice(dialog: HTMLElement) {
+    expect(dialog).toBeTruthy();
+    const user = userEvent.setup();
+
+    const dialogScope = within(dialog);
+
+    const saveButton = dialogScope.getByRole("button", { name: /save/i });
+
+    await user.click(saveButton);
+}
+
+export async function verifyPriceAndStatus(rowIndex: number, newPrice: string) {
+    const rows = await screen.findAllByRole("row");
+
+    const [, ...productsRows] = rows;
+
+    const productRowScope = within(productsRows[rowIndex]);
+    const status = Number(newPrice) === 0 ? "inactive" : "active";
+
+    await productRowScope.findByRole("cell", { name: new RegExp(newPrice, "i") });
+    await productRowScope.findByRole("cell", { name: new RegExp(status, "i") });
+}
