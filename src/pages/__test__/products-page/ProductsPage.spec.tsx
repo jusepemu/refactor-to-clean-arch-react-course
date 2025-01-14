@@ -6,8 +6,10 @@ import { MockWebServer } from "../../../tests/MockWebServer";
 import { givenAProducts, givenThereAreNoProducts } from "./ProductsPage.fixtures";
 import {
     awaitToRenderTable,
+    changeToNonUserAdmin,
     getEditPriceDialogByRowIndex,
     savePrice,
+    triggerOpenEditPriceDialog,
     typePrice,
     verifyError,
     verifyPriceAndStatus,
@@ -28,20 +30,22 @@ describe("Products page", () => {
     afterEach(() => mockWebServer.resetHandlers());
     afterAll(() => mockWebServer.close());
 
-    test("loads and display the title", async () => {
-        givenAProducts(mockWebServer);
+    describe("Should loads and display", () => {
+        test("loads and display the title", async () => {
+            givenAProducts(mockWebServer);
 
-        render(renderComponent());
+            render(renderComponent());
 
-        await screen.findByRole("heading", { name: "Product price updater" });
-    });
+            await screen.findByRole("heading", { name: "Product price updater" });
+        });
 
-    test("loads and display table", () => {
-        givenAProducts(mockWebServer);
+        test("loads and display table", () => {
+            givenAProducts(mockWebServer);
 
-        render(renderComponent());
+            render(renderComponent());
 
-        screen.getAllByRole("columnheader");
+            screen.getAllByRole("columnheader");
+        });
     });
 
     describe("Given a table", () => {
@@ -158,6 +162,17 @@ describe("Products page", () => {
             await savePrice(dialog);
 
             await verifyPriceAndStatus(0, price);
+        });
+
+        test("Should show an error if the use non admin try edit a price", async () => {
+            givenAProducts(mockWebServer);
+            render(renderComponent());
+            await awaitToRenderTable();
+
+            await changeToNonUserAdmin();
+            await triggerOpenEditPriceDialog(0);
+
+            screen.getByText(/only admin users can edit the price of a product/i);
         });
     });
 });

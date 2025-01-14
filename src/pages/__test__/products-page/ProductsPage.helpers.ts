@@ -40,7 +40,7 @@ export function verifyProductsRowsIsEqualToResponse(
     });
 }
 
-export async function getEditPriceDialogByRowIndex(rowIndex: number) {
+export async function triggerOpenEditPriceDialog(rowIndex: number) {
     const user = userEvent.setup();
 
     const rows = await screen.findAllByRole("row");
@@ -57,6 +57,10 @@ export async function getEditPriceDialogByRowIndex(rowIndex: number) {
     });
 
     await user.click(updatePriceButton);
+}
+
+export async function getEditPriceDialogByRowIndex(rowIndex: number) {
+    await triggerOpenEditPriceDialog(rowIndex);
 
     return await screen.findByRole("dialog", {
         name: /update price/i,
@@ -103,4 +107,16 @@ export async function verifyPriceAndStatus(rowIndex: number, newPrice: string) {
 
     await productRowScope.findByRole("cell", { name: new RegExp(newPrice, "i") });
     await productRowScope.findByRole("cell", { name: new RegExp(status, "i") });
+}
+
+export async function changeToNonUserAdmin() {
+    const user = userEvent.setup();
+
+    const selectTypeUser = screen.getByRole("button", {
+        name: /user: admin user/i,
+    });
+    await user.click(selectTypeUser);
+
+    const userNonAdminItem = await screen.findByRole("menuitem", { name: /non admin user/i });
+    await user.click(userNonAdminItem);
 }
