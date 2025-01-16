@@ -11,6 +11,7 @@ import {
     savePrice,
     triggerOpenEditPriceDialog,
     typePrice,
+    verifyButtonSaveIsDisable,
     verifyError,
     verifyPriceAndStatus,
     verifyProductsRowsIsEqualToResponse,
@@ -108,6 +109,7 @@ describe("Products page", () => {
             await typePrice(dialog, "-3");
 
             await verifyError(dialog, "Invalid price format");
+            await verifyButtonSaveIsDisable(dialog);
         });
 
         test("should show a error when price is string", async () => {
@@ -122,6 +124,7 @@ describe("Products page", () => {
             await typePrice(dialog, "aaaa");
 
             await verifyError(dialog, "Only numbers are allowed");
+            await verifyButtonSaveIsDisable(dialog);
         });
 
         test("should show a error when price is upper to 999.99", async () => {
@@ -136,6 +139,7 @@ describe("Products page", () => {
             await typePrice(dialog, "1000");
 
             await verifyError(dialog, "The max possible price is 999.99");
+            await verifyButtonSaveIsDisable(dialog);
         });
 
         test("should update the price correctly ans mark with status active if price is grant to 0", async () => {
