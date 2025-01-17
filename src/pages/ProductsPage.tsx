@@ -32,6 +32,7 @@ export const ProductsPage: React.FC = () => {
     const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
     const [priceError, setPriceError] = useState<string | undefined>(undefined);
 
+    // FIXME: Load products
     useEffect(() => {
         storeApi.getAll().then(response => {
             console.debug("Reloading", reloadKey);
@@ -44,6 +45,8 @@ export const ProductsPage: React.FC = () => {
         });
     }, [reloadKey]);
 
+    // FIXME: Load product
+    // FIXME: Validate user is admin
     const updatingQuantity = useCallback(
         async (id: number) => {
             if (id) {
@@ -66,10 +69,12 @@ export const ProductsPage: React.FC = () => {
         [currentUser]
     );
 
+    // FIXME: Close modal
     const cancelEditPrice = useCallback(() => {
         setEditingProduct(undefined);
     }, []);
 
+    // FIXME: Price validations
     function handleChangePrice(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
         if (!editingProduct) return;
 
@@ -89,6 +94,10 @@ export const ProductsPage: React.FC = () => {
         }
     }
 
+    // FIXME: Validate if is editing state
+    // FIXME: Get product
+    // FIXME: Save product
+    // FIXME: Reload page
     async function saveEditPrice(): Promise<void> {
         if (editingProduct) {
             const remoteProduct = await storeApi.get(editingProduct.id);
@@ -118,6 +127,7 @@ export const ProductsPage: React.FC = () => {
         }
     }
 
+    // FIXME: Define columns
     const columns: GridColDef<Product>[] = useMemo(
         () => [
             { ...baseColumn, field: "id", headerName: "ID", width: 70 },
@@ -183,6 +193,7 @@ export const ProductsPage: React.FC = () => {
         [updatingQuantity]
     );
 
+    // FIXME: render page
     return (
         <Stack direction="column" sx={{ minHeight: "100vh", overflow: "scroll" }}>
             <MainAppBar />
@@ -285,6 +296,7 @@ const StatusContainer = styled.div<{ status: ProductStatus }>`
     width: 100px;
 `;
 
+// FIXME: Mapping products
 function buildProduct(remoteProduct: RemoteProduct): Product {
     return {
         id: remoteProduct.id,
@@ -297,4 +309,5 @@ function buildProduct(remoteProduct: RemoteProduct): Product {
     };
 }
 
+// FIXME: Regex to validate price
 const priceRegex = /^\d+(\.\d{1,2})?$/;
