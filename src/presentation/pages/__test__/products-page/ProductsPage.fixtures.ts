@@ -1,4 +1,4 @@
-import { MockWebServer } from "../../../tests/MockWebServer";
+import { MockWebServer } from "../../../../tests/MockWebServer";
 import productsResponse from "./data/ProductsPage.json";
 
 export function givenAProducts(mockWebServer: MockWebServer) {

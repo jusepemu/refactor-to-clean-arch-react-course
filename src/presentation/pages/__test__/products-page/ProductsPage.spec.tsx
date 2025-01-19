@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "vitest";
 import { AppProvider } from "../../../context/AppProvider";
 import { ProductsPage } from "../../ProductsPage";
-import { MockWebServer } from "../../../tests/MockWebServer";
+import { MockWebServer } from "../../../../tests/MockWebServer";
 import { givenAProducts, givenThereAreNoProducts } from "./ProductsPage.fixtures";
 import {
     awaitToRenderTable,
