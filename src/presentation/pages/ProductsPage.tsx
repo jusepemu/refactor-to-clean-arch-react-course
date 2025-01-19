@@ -13,8 +13,9 @@ import { useAppContext } from "../context/useAppContext";
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { StoreApi } from "../../data/api/StoreApi";
 import { useProducts } from "./useProducts";
-import { GetProducts, buildProduct } from "../../domain/GetProducts.usecase";
+import { GetProducts } from "../../domain/GetProducts.usecase";
 import { Product } from "../../domain/Product";
+import { buildProduct, ProductApiRepository } from "../../data/ProductApi.repository";
 
 const baseColumn: Partial<GridColDef<Product>> = {
     disableColumnMenu: true,
@@ -22,7 +23,8 @@ const baseColumn: Partial<GridColDef<Product>> = {
 };
 
 const storeApi = new StoreApi();
-const getProducts = new GetProducts(storeApi);
+const productApiRepository = new ProductApiRepository(storeApi);
+const getProducts = new GetProducts(productApiRepository);
 
 export const ProductsPage: React.FC = () => {
     const { currentUser } = useAppContext();
