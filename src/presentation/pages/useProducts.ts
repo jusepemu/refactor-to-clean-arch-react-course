@@ -3,10 +3,9 @@ import { useReload } from "../hooks/useReload";
 import { GetProducts } from "../../domain/GetProducts.usecase";
 import { Product } from "../../domain/Product";
 import { useAppContext } from "../context/useAppContext";
-import { StoreApi } from "../../data/api/StoreApi";
-import { buildProduct } from "../../data/ProductApi.repository";
+import { GetProductById, ResourceNotFound } from "../../domain/GetProductById.usecase";
 
-export function useProducts(getProductsUseCase: GetProducts, storeApi: StoreApi) {
+export function useProducts(getProductsUseCase: GetProducts, getProduct: GetProductById) {
     const { currentUser } = useAppContext();
     const [reloadKey, reload] = useReload();
     const [products, setProducts] = useState<Product[]>([]);
@@ -22,24 +21,26 @@ export function useProducts(getProductsUseCase: GetProducts, storeApi: StoreApi)
 
     const updatingQuantity = useCallback(
         async (id: number) => {
-            if (id) {
-                if (!currentUser.isAdmin) {
-                    setError("Only admin users can edit the price of a product");
-                    return;
-                }
+            if (!id) return;
 
-                storeApi
-                    .get(id)
-                    .then(buildProduct)
-                    .then(product => {
-                        setEditingProduct(product);
-                    })
-                    .catch(() => {
-                        setError(`Product with id ${id} not found`);
-                    });
+            if (!currentUser.isAdmin) {
+                setError("Only admin users can edit the price of a product");
+                return;
             }
+
+            getProduct
+                .execute(id)
+                .then(setEditingProduct)
+                .catch(e => {
+                    const message =
+                        e instanceof ResourceNotFound
+                            ? e.message
+                            : "We have some problems to load the product";
+
+                    setError(message);
+                });
         },
-        [currentUser.isAdmin, storeApi]
+        [currentUser.isAdmin, getProduct]
     );
 
     const cancelEditPrice = useCallback(() => {

@@ -15,6 +15,7 @@ import { useProducts } from "./useProducts";
 import { GetProducts } from "../../domain/GetProducts.usecase";
 import { Product } from "../../domain/Product";
 import { ProductApiRepository } from "../../data/ProductApi.repository";
+import { GetProductById } from "../../domain/GetProductById.usecase";
 
 const baseColumn: Partial<GridColDef<Product>> = {
     disableColumnMenu: true,
@@ -24,6 +25,7 @@ const baseColumn: Partial<GridColDef<Product>> = {
 const storeApi = new StoreApi();
 const productApiRepository = new ProductApiRepository(storeApi);
 const getProducts = new GetProducts(productApiRepository);
+const getProduct = new GetProductById(storeApi);
 
 export const ProductsPage: React.FC = () => {
     const [snackBarSuccess, setSnackBarSuccess] = useState<string>();
@@ -44,7 +46,7 @@ export const ProductsPage: React.FC = () => {
         updatingQuantity,
         error,
         cancelEditPrice,
-    } = useProducts(getProducts, storeApi);
+    } = useProducts(getProducts, getProduct);
 
     useEffect(() => setSnackBarError(error), [error]);
 
