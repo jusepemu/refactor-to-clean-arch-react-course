@@ -10,22 +10,14 @@ import { MainAppBar } from "../components/MainAppBar";
 import styled from "@emotion/styled";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { StoreApi } from "../../data/api/StoreApi";
 import { useProducts } from "./useProducts";
-import { GetProducts } from "../../domain/GetProducts.usecase";
 import { Product } from "../../domain/Product";
-import { ProductApiRepository } from "../../data/ProductApi.repository";
-import { GetProductById } from "../../domain/GetProductById.usecase";
+import { CompositionRoot } from "../../CompositionRoot";
 
 const baseColumn: Partial<GridColDef<Product>> = {
     disableColumnMenu: true,
     sortable: false,
 };
-
-const storeApi = new StoreApi();
-const productApiRepository = new ProductApiRepository(storeApi);
-const getProducts = new GetProducts(productApiRepository);
-const getProduct = new GetProductById(productApiRepository);
 
 export const ProductsPage: React.FC = () => {
     const [snackBarSuccess, setSnackBarSuccess] = useState<string>();
@@ -46,7 +38,10 @@ export const ProductsPage: React.FC = () => {
         updatingQuantity,
         error,
         cancelEditPrice,
-    } = useProducts(getProducts, getProduct);
+    } = useProducts(
+        CompositionRoot.getInstance().provideGetProductsUseCase(),
+        CompositionRoot.getInstance().provideGetProductByIdUseCase()
+    );
 
     useEffect(() => setSnackBarError(error), [error]);
 
@@ -76,6 +71,7 @@ export const ProductsPage: React.FC = () => {
     // FIXME: Reload page
     async function saveEditPrice(): Promise<void> {
         if (editingProduct) {
+            const storeApi = CompositionRoot.getInstance().provideStoreApi();
             const remoteProduct = await storeApi.get(editingProduct.id);
 
             if (!remoteProduct) return;
