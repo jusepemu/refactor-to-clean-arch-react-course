@@ -2,7 +2,7 @@ import { Product } from "../domain/Product";
 import { ProductRepository } from "../domain/Product.repository";
 import { RemoteProduct, StoreApi } from "./api/StoreApi";
 
-export function buildProduct(remoteProduct: RemoteProduct): Product {
+function buildProduct(remoteProduct: RemoteProduct): Product {
     return {
         id: remoteProduct.id,
         title: remoteProduct.title,
@@ -22,5 +22,10 @@ export class ProductApiRepository implements ProductRepository {
         const products = remoteProducts.map(buildProduct);
 
         return products;
+    }
+
+    async getById(productId: number): Promise<Product> {
+        const remoteProduct: RemoteProduct = await this.storeApi.get(productId);
+        return buildProduct(remoteProduct);
     }
 }

@@ -25,7 +25,7 @@ const baseColumn: Partial<GridColDef<Product>> = {
 const storeApi = new StoreApi();
 const productApiRepository = new ProductApiRepository(storeApi);
 const getProducts = new GetProducts(productApiRepository);
-const getProduct = new GetProductById(storeApi);
+const getProduct = new GetProductById(productApiRepository);
 
 export const ProductsPage: React.FC = () => {
     const [snackBarSuccess, setSnackBarSuccess] = useState<string>();
