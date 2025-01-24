@@ -8,7 +8,7 @@ import {
 import { Footer } from "../components/Footer";
 import { MainAppBar } from "../components/MainAppBar";
 import styled from "@emotion/styled";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { useProducts } from "./useProducts";
 import { Product } from "../../domain/Product";
@@ -21,7 +21,6 @@ const baseColumn: Partial<GridColDef<Product>> = {
 
 export const ProductsPage: React.FC = () => {
     const [snackBarSuccess, setSnackBarSuccess] = useState<string>();
-    const [priceError, setPriceError] = useState<string | undefined>(undefined);
 
     /**
      * @deprecated
@@ -38,32 +37,14 @@ export const ProductsPage: React.FC = () => {
         updatingQuantity,
         error,
         cancelEditPrice,
+        onChangePrice,
+        priceError,
     } = useProducts(
         CompositionRoot.getInstance().provideGetProductsUseCase(),
         CompositionRoot.getInstance().provideGetProductByIdUseCase()
     );
 
     useEffect(() => setSnackBarError(error), [error]);
-
-    // FIXME: Price validations
-    function handleChangePrice(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
-        if (!editingProduct) return;
-
-        const isValidNumber = !isNaN(+event.target.value);
-        setEditingProduct({ ...editingProduct, price: event.target.value });
-
-        if (!isValidNumber) {
-            setPriceError("Only numbers are allowed");
-        } else {
-            if (!priceRegex.test(event.target.value)) {
-                setPriceError("Invalid price format");
-            } else if (+event.target.value > 999.99) {
-                setPriceError("The max possible price is 999.99");
-            } else {
-                setPriceError(undefined);
-            }
-        }
-    }
 
     // FIXME: Validate if is editing state
     // FIXME: Get product
@@ -225,7 +206,7 @@ export const ProductsPage: React.FC = () => {
                             <TextField
                                 label={"Price"}
                                 value={editingProduct.price}
-                                onChange={handleChangePrice}
+                                onChange={e => onChangePrice(e.target.value!)}
                                 error={priceError !== undefined}
                                 helperText={priceError}
                             />
@@ -260,6 +241,3 @@ const StatusContainer = styled.div<{ status: ProductStatus }>`
     border-radius: 20px;
     width: 100px;
 `;
-
-// FIXME: Regex to validate price
-const priceRegex = /^\d+(\.\d{1,2})?$/;
