@@ -3,15 +3,12 @@ import { ProductRepository } from "../domain/Product.repository";
 import { RemoteProduct, StoreApi } from "./api/StoreApi";
 
 function buildProduct(remoteProduct: RemoteProduct): Product {
-    return {
+    return Product.create({
         id: remoteProduct.id,
         title: remoteProduct.title,
         image: remoteProduct.image,
-        price: remoteProduct.price.toLocaleString("en-US", {
-            maximumFractionDigits: 2,
-            minimumFractionDigits: 2,
-        }),
-    };
+        price: remoteProduct.price.toString(),
+    });
 }
 
 export class ProductApiRepository implements ProductRepository {
