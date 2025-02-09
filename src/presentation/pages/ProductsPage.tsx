@@ -29,6 +29,15 @@ export const ProductsPage: React.FC = () => {
      */
     const [snackBarError, setSnackBarError] = useState<string>();
 
+    const getProductsUseCase = useMemo(
+        () => CompositionRoot.getInstance().provideGetProductsUseCase(),
+        []
+    );
+    const getProductByIdUseCase = useMemo(
+        () => CompositionRoot.getInstance().provideGetProductByIdUseCase(),
+        []
+    );
+
     const {
         products,
         reload,
@@ -39,10 +48,7 @@ export const ProductsPage: React.FC = () => {
         cancelEditPrice,
         onChangePrice,
         priceError,
-    } = useProducts(
-        CompositionRoot.getInstance().provideGetProductsUseCase(),
-        CompositionRoot.getInstance().provideGetProductByIdUseCase()
-    );
+    } = useProducts(getProductsUseCase, getProductByIdUseCase);
 
     useEffect(() => setSnackBarError(error), [error]);
 
