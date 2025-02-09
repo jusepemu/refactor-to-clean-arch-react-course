@@ -1,19 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useReload } from "../hooks/useReload";
 import { GetProducts } from "../../domain/GetProducts.usecase";
-import { Product } from "../../domain/Product";
+import { Product, ProductData, ProductStatus } from "../../domain/Product";
 import { useAppContext } from "../context/useAppContext";
 import { GetProductById, ResourceNotFound } from "../../domain/GetProductById.usecase";
 import { Price } from "../../domain/Price";
 
-export type ProductStatus = "active" | "inactive";
-
-export type ProductViewModel = Product & { status: ProductStatus };
+export type ProductViewModel = ProductData & { status: ProductStatus };
 
 function buildProductViewModel(product: Product): ProductViewModel {
     return {
         ...product,
-        status: +product.price === 0 ? "inactive" : "active",
+        price: product.price.value.toFixed(2),
     };
 }
 
