@@ -4,8 +4,7 @@ import { GetProducts } from "../../domain/GetProducts.usecase";
 import { Product } from "../../domain/Product";
 import { useAppContext } from "../context/useAppContext";
 import { GetProductById, ResourceNotFound } from "../../domain/GetProductById.usecase";
-
-const priceRegex = /^\d+(\.\d{1,2})?$/;
+import { Price } from "../../domain/Price";
 
 export function useProducts(getProductsUseCase: GetProducts, getProduct: GetProductById) {
     const { currentUser } = useAppContext();
@@ -50,23 +49,18 @@ export function useProducts(getProductsUseCase: GetProducts, getProduct: GetProd
         setEditingProduct(undefined);
     }, []);
 
-    // FIXME: Price validations
     function onChangePrice(price: string): void {
         if (!editingProduct) return;
 
-        const isValidNumber = !isNaN(+price);
-        setEditingProduct({ ...editingProduct, price });
-
-        if (!isValidNumber) {
-            setPriceError("Only numbers are allowed");
-        } else {
-            if (!priceRegex.test(price)) {
-                setPriceError("Invalid price format");
-            } else if (+price > 999.99) {
-                setPriceError("The max possible price is 999.99");
-            } else {
-                setPriceError(undefined);
-            }
+        try {
+            setEditingProduct({ ...editingProduct, price });
+            Price.create(price);
+            setPriceError(undefined);
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "Unexpected error has occurred";
+            console.log(message);
+            setPriceError(message);
         }
     }
 
