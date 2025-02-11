@@ -2,6 +2,7 @@ import { StoreApi } from "./data/api/StoreApi";
 import { ProductApiRepository } from "./data/ProductApi.repository";
 import { GetProductById } from "./domain/GetProductById.usecase";
 import { GetProducts } from "./domain/GetProducts.usecase";
+import { UpdateProductPrice } from "./domain/UpdateProductPrice.usecase";
 
 export class CompositionRoot {
     private static instance: CompositionRoot;
@@ -26,8 +27,7 @@ export class CompositionRoot {
         return new GetProductById(this.productApiRepository);
     }
 
-    // TODO: Temporal function to provide store api
-    provideStoreApi(): StoreApi {
-        return this.storeApi;
+    provideUpdateProductPrice(): UpdateProductPrice {
+        return new UpdateProductPrice(this.productApiRepository, this.storeApi);
     }
 }
