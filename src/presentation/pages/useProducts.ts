@@ -5,7 +5,7 @@ import { Product, ProductData, ProductStatus } from "../../domain/Product";
 import { useAppContext } from "../context/useAppContext";
 import { GetProductById, ResourceNotFound } from "../../domain/GetProductById.usecase";
 import { Price } from "../../domain/Price";
-import { StoreApi } from "../../data/api/StoreApi";
+import { UpdateProductPrice } from "../../domain/UpdateProductPrice.usecase";
 
 export type ProductViewModel = ProductData & { status: ProductStatus };
 
@@ -21,7 +21,7 @@ function buildProductViewModel(product: Product): ProductViewModel {
 export function useProducts(
     getProductsUseCase: GetProducts,
     getProduct: GetProductById,
-    storeApi: StoreApi
+    updateProductPrice: UpdateProductPrice
 ) {
     const { currentUser } = useAppContext();
     const [reloadKey, reload] = useReload();
@@ -84,24 +84,14 @@ export function useProducts(
         }
     }
 
-    // FIXME: Validate if is editing state
-    // FIXME: Get product
-    // FIXME: Save product
-    // FIXME: Reload page
     async function saveEditPrice(): Promise<void> {
         if (editingProduct) {
-            const remoteProduct = await storeApi.get(editingProduct.id);
-
-            if (!remoteProduct) return;
-
-            const editedRemoteProduct = {
-                ...remoteProduct,
-                price: Number(editingProduct.price),
-            };
-
             try {
-                await storeApi.post(editedRemoteProduct);
-
+                await updateProductPrice.execute(
+                    currentUser,
+                    editingProduct.id,
+                    editingProduct.price
+                );
                 setMessage({
                     type: "success",
                     text: `Price ${editingProduct.price} for '${editingProduct.title}' updated`,

@@ -19,8 +19,6 @@ const baseColumn: Partial<GridColDef<ProductViewModel>> = {
     sortable: false,
 };
 
-const storeApi = CompositionRoot.getInstance().provideStoreApi();
-
 export const ProductsPage: React.FC = () => {
     const getProductsUseCase = useMemo(
         () => CompositionRoot.getInstance().provideGetProductsUseCase(),
@@ -28,6 +26,11 @@ export const ProductsPage: React.FC = () => {
     );
     const getProductByIdUseCase = useMemo(
         () => CompositionRoot.getInstance().provideGetProductByIdUseCase(),
+        []
+    );
+
+    const updateProductPrice = useMemo(
+        () => CompositionRoot.getInstance().provideUpdateProductPrice(),
         []
     );
 
@@ -41,7 +44,7 @@ export const ProductsPage: React.FC = () => {
         onChangePrice,
         priceError,
         saveEditPrice,
-    } = useProducts(getProductsUseCase, getProductByIdUseCase, storeApi);
+    } = useProducts(getProductsUseCase, getProductByIdUseCase, updateProductPrice);
 
     const columns: GridColDef<ProductViewModel>[] = useMemo(
         () => [
