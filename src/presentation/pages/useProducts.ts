@@ -5,8 +5,11 @@ import { Product, ProductData, ProductStatus } from "../../domain/Product";
 import { useAppContext } from "../context/useAppContext";
 import { GetProductById, ResourceNotFound } from "../../domain/GetProductById.usecase";
 import { Price } from "../../domain/Price";
+import { StoreApi } from "../../data/api/StoreApi";
 
 export type ProductViewModel = ProductData & { status: ProductStatus };
+
+type Message = { type: "success" | "error"; text: string };
 
 function buildProductViewModel(product: Product): ProductViewModel {
     return {
@@ -15,12 +18,17 @@ function buildProductViewModel(product: Product): ProductViewModel {
     };
 }
 
-export function useProducts(getProductsUseCase: GetProducts, getProduct: GetProductById) {
+export function useProducts(
+    getProductsUseCase: GetProducts,
+    getProduct: GetProductById,
+    storeApi: StoreApi
+) {
     const { currentUser } = useAppContext();
     const [reloadKey, reload] = useReload();
+
     const [products, setProducts] = useState<ProductViewModel[]>([]);
     const [editingProduct, setEditingProduct] = useState<ProductViewModel | undefined>(undefined);
-    const [error, setError] = useState("");
+    const [message, setMessage] = useState<Message>();
     const [priceError, setPriceError] = useState<string | undefined>(undefined);
 
     useEffect(() => {
@@ -35,7 +43,10 @@ export function useProducts(getProductsUseCase: GetProducts, getProduct: GetProd
             if (!id) return;
 
             if (!currentUser.isAdmin) {
-                setError("Only admin users can edit the price of a product");
+                setMessage({
+                    type: "error",
+                    text: "Only admin users can edit the price of a product",
+                });
                 return;
             }
 
@@ -43,12 +54,12 @@ export function useProducts(getProductsUseCase: GetProducts, getProduct: GetProd
                 .execute(id)
                 .then(p => setEditingProduct(buildProductViewModel(p)))
                 .catch(e => {
-                    const message =
+                    const text =
                         e instanceof ResourceNotFound
                             ? e.message
                             : "We have some problems to load the product";
 
-                    setError(message);
+                    setMessage({ type: "error", text });
                 });
         },
         [currentUser.isAdmin, getProduct]
@@ -73,15 +84,54 @@ export function useProducts(getProductsUseCase: GetProducts, getProduct: GetProd
         }
     }
 
+    // FIXME: Validate if is editing state
+    // FIXME: Get product
+    // FIXME: Save product
+    // FIXME: Reload page
+    async function saveEditPrice(): Promise<void> {
+        if (editingProduct) {
+            const remoteProduct = await storeApi.get(editingProduct.id);
+
+            if (!remoteProduct) return;
+
+            const editedRemoteProduct = {
+                ...remoteProduct,
+                price: Number(editingProduct.price),
+            };
+
+            try {
+                await storeApi.post(editedRemoteProduct);
+
+                setMessage({
+                    type: "success",
+                    text: `Price ${editingProduct.price} for '${editingProduct.title}' updated`,
+                });
+                setEditingProduct(undefined);
+                reload();
+            } catch (error) {
+                setMessage({
+                    type: "success",
+                    text: `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`,
+                });
+                setEditingProduct(undefined);
+                reload();
+            }
+        }
+    }
+
+    const onCloseMessage = useCallback(() => {
+        setMessage(undefined);
+    }, []);
+
     return {
         products,
-        reload,
         editingProduct,
-        setEditingProduct,
         updatingQuantity,
-        error,
+        message,
+        onCloseMessage,
         cancelEditPrice,
         priceError,
         onChangePrice,
+        saveEditPrice,
     };
 }

@@ -8,7 +8,7 @@ import {
 import { Footer } from "../components/Footer";
 import { MainAppBar } from "../components/MainAppBar";
 import styled from "@emotion/styled";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { ProductViewModel, useProducts } from "./useProducts";
 import { CompositionRoot } from "../../CompositionRoot";
@@ -19,16 +19,9 @@ const baseColumn: Partial<GridColDef<ProductViewModel>> = {
     sortable: false,
 };
 
+const storeApi = CompositionRoot.getInstance().provideStoreApi();
+
 export const ProductsPage: React.FC = () => {
-    const [snackBarSuccess, setSnackBarSuccess] = useState<string>();
-
-    /**
-     * @deprecated
-     *
-     * @description use error returned in useProducts
-     */
-    const [snackBarError, setSnackBarError] = useState<string>();
-
     const getProductsUseCase = useMemo(
         () => CompositionRoot.getInstance().provideGetProductsUseCase(),
         []
@@ -40,51 +33,15 @@ export const ProductsPage: React.FC = () => {
 
     const {
         products,
-        reload,
         editingProduct,
-        setEditingProduct,
         updatingQuantity,
-        error,
+        message,
+        onCloseMessage,
         cancelEditPrice,
         onChangePrice,
         priceError,
-    } = useProducts(getProductsUseCase, getProductByIdUseCase);
-
-    useEffect(() => setSnackBarError(error), [error]);
-
-    // FIXME: Validate if is editing state
-    // FIXME: Get product
-    // FIXME: Save product
-    // FIXME: Reload page
-    async function saveEditPrice(): Promise<void> {
-        if (editingProduct) {
-            const storeApi = CompositionRoot.getInstance().provideStoreApi();
-            const remoteProduct = await storeApi.get(editingProduct.id);
-
-            if (!remoteProduct) return;
-
-            const editedRemoteProduct = {
-                ...remoteProduct,
-                price: Number(editingProduct.price),
-            };
-
-            try {
-                await storeApi.post(editedRemoteProduct);
-
-                setSnackBarSuccess(
-                    `Price ${editingProduct.price} for '${editingProduct.title}' updated`
-                );
-                setEditingProduct(undefined);
-                reload();
-            } catch (error) {
-                setSnackBarError(
-                    `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`
-                );
-                setEditingProduct(undefined);
-                reload();
-            }
-        }
-    }
+        saveEditPrice,
+    } = useProducts(getProductsUseCase, getProductByIdUseCase, storeApi);
 
     const columns: GridColDef<ProductViewModel>[] = useMemo(
         () => [
@@ -174,20 +131,20 @@ export const ProductsPage: React.FC = () => {
 
             <Snackbar
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-                open={snackBarError !== undefined}
+                open={message?.type === "error"}
                 autoHideDuration={2000}
-                onClose={() => setSnackBarError(undefined)}
+                onClose={onCloseMessage}
             >
-                <Alert severity="error">{snackBarError}</Alert>
+                <Alert severity="error">{message?.text}</Alert>
             </Snackbar>
 
             <Snackbar
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-                open={snackBarSuccess !== undefined}
+                open={message?.type === "success"}
                 autoHideDuration={2000}
-                onClose={() => setSnackBarSuccess(undefined)}
+                onClose={onCloseMessage}
             >
-                <Alert severity="success">{snackBarSuccess}</Alert>
+                <Alert severity="success">{message?.text}</Alert>
             </Snackbar>
 
             {editingProduct && (
