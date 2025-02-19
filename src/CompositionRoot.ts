@@ -28,6 +28,6 @@ export class CompositionRoot {
     }
 
     provideUpdateProductPrice(): UpdateProductPrice {
-        return new UpdateProductPrice(this.productApiRepository, this.storeApi);
+        return new UpdateProductPrice(this.productApiRepository);
     }
 }
